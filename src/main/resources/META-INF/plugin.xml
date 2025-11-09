@@ -23,4 +23,10 @@
     <extensions defaultExtensionNs="com.intellij">
 
     </extensions>
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationConfigurable
+                instance="io.github.vihanmy.pgyappupload.configurable.PluginSettingsConfigurable"
+                id="io.github.vihanmy.pgyappupload.setting.MyPluginSettingsConfigurable"
+                displayName="蒲公英App上传"/>
+    </extensions>
 </idea-plugin>
