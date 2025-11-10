@@ -23,6 +23,13 @@
     <extensions defaultExtensionNs="com.intellij">
 
     </extensions>
+
+    <actions>
+        <action id="io.github.vihanmy.pgyappupload.actions.MainAction"
+                class="io.github.vihanmy.pgyappupload.actions.MainAction" text="打开主页面" description="主页面入口">
+            <add-to-group group-id="TextViewerEditorPopupMenu" anchor="first"/>
+        </action>
+    </actions>
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable
                 instance="io.github.vihanmy.pgyappupload.configurable.PluginSettingsConfigurable"
