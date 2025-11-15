@@ -32,11 +32,11 @@ object Tool {
         return chosenFiles.getOrNull(0)
     }
 
-    fun getFileCreationTime(vf: VirtualFile): String? {
+    fun getFileLastModifiedTime(vf: VirtualFile): String? {
         return try {
             val path = vf.toNioPath()
             val attrs: BasicFileAttributes = Files.readAttributes(path, BasicFileAttributes::class.java)
-            val creationInstant: Instant = attrs.creationTime().toInstant()
+            val creationInstant: Instant = attrs.lastModifiedTime().toInstant()
 
             // 格式化为本地可读时间（例如：2025-11-10 14:32:10）
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")

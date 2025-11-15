@@ -3,6 +3,8 @@ package io.github.vihanmy.pgyappupload.dialog
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.onClick
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -77,7 +79,8 @@ class MainDialog(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(10.dp)
-                                .weight(1f),
+                                .weight(1f)
+                                .verticalScroll(rememberScrollState()),
                         ) {
                             when (router.pageStack.lastOrNull()) {
                                 Page.Home -> PageHome()
@@ -106,7 +109,7 @@ class MainDialog(
                     router.pop()
                 },
             )
-            Text(router.pageStack.lastOrNull()?.getTitle() ?: "", Modifier.weight(1f))
+            Text(router.pageStack.lastOrNull()?.getTitle() ?: "", maxLines = 1, modifier = Modifier.weight(1f))
             Icon(
                 imageVector = Icons.Filled.Menu,
                 contentDescription = "菜单",

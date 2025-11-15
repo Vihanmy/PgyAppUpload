@@ -125,6 +125,7 @@ class AppUploadTool(
     suspend fun updateFile(
         tokenBean: TokenGetBean,
         filePath: String,
+        progress: (Float) -> Unit = this.progress
     ): Boolean {
         val params = mutableMapOf<String, String>()
         val key = tokenBean.params?.key ?: return false
@@ -155,6 +156,10 @@ class AppUploadTool(
         }
 
         return updateResult?.code == 204
+    }
+
+    suspend fun fetchToken(): TokenGetBean? {
+        return getToken(API_KEY_DEV, APP_PATH)
     }
 
     suspend fun getToken(
