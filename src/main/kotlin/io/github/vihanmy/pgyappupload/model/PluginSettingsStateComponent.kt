@@ -27,10 +27,18 @@ class PluginSettingsStateComponent : PersistentStateComponent<PluginSettingsStat
 
     fun isValueEqualWith(other: PluginSettingsStateComponent?): Boolean {
         if (other == null) return false
-        return (other.pgyApiKey == pgyApiKey)
+        if (other.pgyApiKey != pgyApiKey) return false
+        if (other.packageProcessConfigList.size != packageProcessConfigList.size) return false
+
+        other.packageProcessConfigList.forEachIndexed { index, packageProcessConfig ->
+            if (packageProcessConfigList[index].contentEqual(packageProcessConfig).not()) return false
+        }
+
+        return true
     }
 
     ///////////////////////////////////////////////////////// paras
     var pgyApiKey: String = ""
+    var packageProcessConfigList: MutableList<PackageProcessConfig> = mutableListOf()
 
 }

@@ -25,6 +25,7 @@ import io.github.vihanmy.pgyappupload.pages.PageChooseFileToUpload
 import io.github.vihanmy.pgyappupload.pages.PageHome
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
+import javax.swing.Action
 import javax.swing.JComponent
 
 val RouterProvidableCompositionLocal = staticCompositionLocalOf<PageRouter> {
@@ -46,10 +47,8 @@ class MainDialog(
         init()
     }
 
-    @Composable
-    fun PxToDp(px: Float): Float {
-        val density = LocalDensity.current
-        return with(density) { px.toDp().value }
+    override fun createActions(): Array<out Action?> {
+        return emptyArray()
     }
 
     @OptIn(ExperimentalFoundationApi::class)
@@ -96,6 +95,12 @@ class MainDialog(
             }
         }
 
+    }
+
+    @Composable
+    fun PxToDp(px: Float): Float {
+        val density = LocalDensity.current
+        return with(density) { px.toDp().value }
     }
 
     @Composable
