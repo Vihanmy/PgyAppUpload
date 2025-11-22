@@ -3,6 +3,8 @@ package io.github.vihanmy.pgyappupload.jcomponent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.getValue
@@ -89,6 +91,7 @@ class PluginSettingsComponent(
                         modifier = Modifier
                             .height(with(density) { this@PluginSettingsComponent.height.toFloat().toDp() })
                             .width(with(density) { this@PluginSettingsComponent.width.toFloat().toDp() })
+                            .verticalScroll(rememberScrollState()),
                     ) {
                         PagePluginSetting(settingsState)
                     }

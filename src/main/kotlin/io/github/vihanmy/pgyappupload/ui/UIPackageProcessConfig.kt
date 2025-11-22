@@ -13,6 +13,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
@@ -39,6 +40,8 @@ fun UIPackageProcessConfig(
     onAddCmd: () -> Unit = {},
     onRemoveCmd: (CmdConfigUiState) -> Unit = { _ -> },
     onRemoveConfig: () -> Unit = {},
+    onCopyConfig: () -> Unit = {},
+    onCopyCmd: (CmdConfigUiState) -> Unit = {},
 ) {
     Column(Modifier.padding(10.dp).border(1.dp, Color.Black, MaterialTheme.shapes.medium).padding(15.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 10.dp, bottom = 5.dp)) {
@@ -58,6 +61,15 @@ fun UIPackageProcessConfig(
             }) {
                 Icon(
                     imageVector = Icons.Default.Delete,
+                    tint = Color.White,
+                    contentDescription = "",
+                )
+            }
+            Button({
+                onCopyConfig()
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Add,
                     tint = Color.White,
                     contentDescription = "",
                 )
@@ -89,9 +101,15 @@ fun UIPackageProcessConfig(
             )
         }
         for (cmdConfig in config.cmdList) {
-            UICmdConfig(cmdConfig, config.cmdList.indexOf(cmdConfig), onRemoveCmd = {
-                onRemoveCmd(it)
-            })
+            UICmdConfig(
+                cmdConfig, config.cmdList.indexOf(cmdConfig),
+                onRemoveCmd = {
+                    onRemoveCmd(cmdConfig)
+                },
+                onCopyCmd = {
+                    onCopyCmd(cmdConfig)
+                }
+            )
         }
 
         Button({
@@ -111,7 +129,8 @@ fun UIPackageProcessConfig(
 fun UICmdConfig(
     cmdConfig: CmdConfigUiState,
     index: Int,
-    onRemoveCmd: (CmdConfigUiState) -> Unit = { }
+    onRemoveCmd: () -> Unit = { },
+    onCopyCmd: () -> Unit = { }
 ) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 10.dp, bottom = 5.dp)) {
@@ -127,15 +146,36 @@ fun UICmdConfig(
             }
 
             Button({
-                onRemoveCmd(cmdConfig)
+                onRemoveCmd()
             }) {
                 Icon(
                     imageVector = Icons.Default.Delete,
                     tint = Color.White,
                     contentDescription = "",
                 )
-                Text("删除")
             }
+
+            Button({
+                onCopyCmd()
+            }) {
+                Icon(
+                    imageVector = Icons.Default.AddCircle,
+                    tint = Color.White,
+                    contentDescription = "",
+                )
+            }
+        }
+        Column {
+            Text("名称:")
+            BasicTextField(
+                value = cmdConfig.name,
+                onValueChange = {
+                    cmdConfig.name = it
+                },
+                modifier = Modifier
+                    .border(1.dp, Color.Black)
+                    .padding(10.dp),
+            )
         }
         Column {
             Text("命令行:")

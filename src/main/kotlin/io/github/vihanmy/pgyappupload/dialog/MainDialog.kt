@@ -21,8 +21,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import io.github.vihanmy.pgyappupload.core.PageRouter
 import io.github.vihanmy.pgyappupload.model.Page
+import io.github.vihanmy.pgyappupload.model.PluginSettingsStateComponent
+import io.github.vihanmy.pgyappupload.model.uistate.PluginSettingsUiState
 import io.github.vihanmy.pgyappupload.pages.PageChooseFileToUpload
 import io.github.vihanmy.pgyappupload.pages.PageHome
+import io.github.vihanmy.pgyappupload.pages.PagePluginSetting
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
 import javax.swing.Action
@@ -84,6 +87,9 @@ class MainDialog(
                             when (router.pageStack.lastOrNull()) {
                                 Page.Home -> PageHome()
                                 is Page.ChooseFile4Upload -> PageChooseFileToUpload()
+                                is Page.Setting -> PagePluginSetting(PluginSettingsUiState().apply {
+                                    updateFromStateComponent(PluginSettingsStateComponent.instance)
+                                })
                                 //
                                 null -> {
                                     Text("Noting to display")
@@ -115,11 +121,15 @@ class MainDialog(
                 },
             )
             Text(router.pageStack.lastOrNull()?.getTitle() ?: "", maxLines = 1, modifier = Modifier.weight(1f))
-            Icon(
-                imageVector = Icons.Filled.Menu,
-                contentDescription = "菜单",
-                modifier = Modifier.padding(10.dp),
-            )
+            if (router.pageStack.lastOrNull() != Page.Setting) {
+                Icon(
+                    imageVector = Icons.Filled.Menu,
+                    contentDescription = "菜单",
+                    modifier = Modifier.padding(10.dp).onClick {
+                        router.push(Page.Setting)
+                    },
+                )
+            }
         }
     }
 

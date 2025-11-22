@@ -20,6 +20,7 @@ class PluginSettingsUiState {
                 name = packageProcessConfig.name
                 cmdList.addAll(packageProcessConfig.cmdList.map { cmdConfig ->
                     CmdConfigUiState().apply {
+                        name = cmdConfig.name
                         cmd = cmdConfig.cmd
                         workDir = cmdConfig.workDir
                         evenStr = cmdConfig.evenStr
@@ -42,6 +43,7 @@ class PluginSettingsUiState {
                         cmdList.addAll(
                             item.cmdList.map { cmdConfig ->
                                 CmdConfig().apply {
+                                    name = cmdConfig.name
                                     cmd = cmdConfig.cmd
                                     workDir = cmdConfig.workDir
                                     evenStr = cmdConfig.evenStr

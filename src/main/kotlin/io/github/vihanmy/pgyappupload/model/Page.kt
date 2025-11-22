@@ -9,7 +9,8 @@ sealed class Page(
     }
 
     /////////////////////////////////////////////////////////
-    object Home : Page("主页")
+    data object Home : Page("主页")
     class ChooseFile4Upload : Page("选择文件上传")
+    data object Setting : Page("设置")
 }
 

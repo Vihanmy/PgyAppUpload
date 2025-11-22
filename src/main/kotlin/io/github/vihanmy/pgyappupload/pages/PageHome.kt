@@ -5,8 +5,28 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import io.github.vihanmy.pgyappupload.core.AppUploadTool
+import io.github.vihanmy.pgyappupload.core.AppUploadTool.Companion.CHECK_TIME_ONCE
+import io.github.vihanmy.pgyappupload.core.AppUploadTool.Companion.MAX_CHECK_TIME
+import io.github.vihanmy.pgyappupload.core.CmdInvoker
+import io.github.vihanmy.pgyappupload.core.Tool
+import io.github.vihanmy.pgyappupload.dialog.ProJectProvidableCompositionLocal
 import io.github.vihanmy.pgyappupload.dialog.RouterProvidableCompositionLocal
+import io.github.vihanmy.pgyappupload.model.PackageProcessConfig
 import io.github.vihanmy.pgyappupload.model.Page
+import io.github.vihanmy.pgyappupload.model.PluginSettingsStateComponent
+import io.github.vihanmy.pgyappupload.model.network.ResultCheckBean
+import io.github.vihanmy.pgyappupload.model.processstep.ProcessStep
+import io.github.vihanmy.pgyappupload.model.processstep.ProcessStepState
+import io.github.vihanmy.pgyappupload.model.processstep.ProcessStepWithProgress
+import io.github.vihanmy.pgyappupload.tool.ConsoleViewTool
+import io.github.vihanmy.pgyappupload.ui.UIProgressStep
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  *# 主页
@@ -20,6 +40,101 @@ import io.github.vihanmy.pgyappupload.model.Page
 @Composable
 fun PageHome() {
     val router = RouterProvidableCompositionLocal.current
+    val project = ProJectProvidableCompositionLocal.current
+    val setting = PluginSettingsStateComponent.instance
+    val progressStep = remember { mutableStateListOf<ProcessStep>() }
+
+    fun processConfig(process: PackageProcessConfig) {
+        progressStep.clear()
+        val consoleView = ConsoleViewTool.createConsole(project)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val processStartTime = System.currentTimeMillis()
+
+            //██执行打包命令
+            process.cmdList.forEachIndexed { index, cmd ->
+                val invoker = CmdInvoker(cmd, consoleView, project)
+                val stepOfCmd = ProcessStep("命令行执行(${index + 1}):${cmd.name}", cmd.getDescription())
+                progressStep.add(stepOfCmd)
+                val event = invoker.run()
+                val isSuccess = event.exitCode == 0
+                stepOfCmd.markState(isSuccess, if (isSuccess) "命令执行成功" else "${event.exitCode} ${event.text}")
+                if (isSuccess.not()) {
+                    return@launch
+                } else {
+                    stepOfCmd.showStepLine = true
+                }
+            }
+
+            //██ 打包产物校验
+            val outPutCheckProcess = ProcessStep("产物校验", "校验产物的有效性")
+            progressStep.add(outPutCheckProcess)
+            val filePath = process.packageOutPutPath
+            val checkResult = Tool.checkOutPutFile(filePath, if (process.cmdList.isEmpty()) null else processStartTime)
+            val isCheckSuccess = checkResult.first
+            outPutCheckProcess.markState(isCheckSuccess, checkResult.second ?: "")
+            if (isCheckSuccess.not()) return@launch
+            outPutCheckProcess.showStepLine = true
+
+            //██ 获取配置的 api key
+            val stepOfApiKeyVerify = ProcessStep("获取配置的 API KEY")
+            progressStep.add(stepOfApiKeyVerify)
+            val apiKey: String = PluginSettingsStateComponent.instance.pgyApiKey
+            stepOfApiKeyVerify.state = if (apiKey.isNullOrBlank()) ProcessStepState.Failed else ProcessStepState.Success
+            val hasApiKey = apiKey.isNullOrBlank().not()
+            stepOfApiKeyVerify.markState(hasApiKey, if (hasApiKey) "使用的 KEY 是 : $apiKey" else "未配置API KEY")
+            if (hasApiKey.not()) return@launch
+            stepOfApiKeyVerify.showStepLine = true
+
+            //██ 获取文件上传Token
+            val stepOfGetToken = ProcessStep("获取文件上传Token")
+            progressStep.add(stepOfGetToken)
+            val uploadTool = AppUploadTool(apiKey, filePath)
+            val tokenBean = uploadTool.fetchToken()
+            val buildKey = tokenBean?.params?.key
+            //
+            val errorMsg = if (buildKey == null) {
+                "Token 获取失败"
+            } else {
+                "Token 获取成功"
+            }
+            stepOfGetToken.markState(buildKey != null, errorMsg)
+            if (buildKey == null) return@launch
+            stepOfGetToken.showStepLine = true
+
+            //██ 文件上传
+            val stepOfFileUpload = ProcessStepWithProgress("文件上传", "文件上传中")
+            progressStep.add(stepOfFileUpload)
+            val uploadResult = uploadTool.updateFile(tokenBean, filePath) { progress ->
+                stepOfFileUpload.progress = progress
+            }
+            stepOfFileUpload.markState(uploadResult, if (uploadResult) "文件上传成功" else "文件上传失败")
+            stepOfFileUpload.showStepLine = true
+
+            if (uploadResult.not()) return@launch
+
+            //██ 结果检测
+            val resultCheckStep = ProcessStep("处理结果检测", "检测中")
+            progressStep.add(resultCheckStep)
+            var testTime = 1
+            var isSuccess = false
+            var resultCheckBean: ResultCheckBean? = null
+            while (testTime <= MAX_CHECK_TIME) {
+                resultCheckStep.msg = "结果检测中(${testTime})"
+                delay(CHECK_TIME_ONCE)
+                resultCheckBean = uploadTool.resultCheck(apiKey, buildKey)
+                if (resultCheckBean != null) {
+                    isSuccess = true
+                    break
+                }
+                testTime++
+            }
+
+            val re = Tool.getResultStr(resultCheckBean, isSuccess, filePath)
+            resultCheckStep.markState(isSuccess, re)
+        }
+
+    }
 
     //
     Column {
@@ -27,6 +142,18 @@ fun PageHome() {
             router.push(Page.ChooseFile4Upload())
         }) {
             Text("选择已有文件上传")
+        }
+
+        setting.packageProcessConfigList.forEach { process ->
+            Button({
+                processConfig(process)
+            }) {
+                Text("\uD83C\uDFAC\uFE0F ${process.name}")
+            }
+        }
+        
+        progressStep.forEach { step ->
+            UIProgressStep(step)
         }
     }
 }

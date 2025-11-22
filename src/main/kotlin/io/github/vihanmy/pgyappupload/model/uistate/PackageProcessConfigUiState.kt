@@ -9,4 +9,12 @@ class PackageProcessConfigUiState {
     var cmdList = mutableStateListOf<CmdConfigUiState>()
     var packageOutPutPath by mutableStateOf("")
     var name by mutableStateOf("")
+
+    fun copy(): PackageProcessConfigUiState {
+        return PackageProcessConfigUiState().apply {
+            this.packageOutPutPath = this@PackageProcessConfigUiState.packageOutPutPath
+            this.name = this@PackageProcessConfigUiState.name
+            this.cmdList.addAll(this@PackageProcessConfigUiState.cmdList.map { it.copy() })
+        }
+    }
 }

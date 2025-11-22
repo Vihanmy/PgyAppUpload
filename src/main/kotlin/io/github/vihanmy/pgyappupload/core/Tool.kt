@@ -1,5 +1,6 @@
 package io.github.vihanmy.pgyappupload.core
 
+import com.google.gson.GsonBuilder
 import com.intellij.execution.configurations.CommandLineTokenizer
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
@@ -7,6 +8,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.isFile
 import io.github.vihanmy.pgyappupload.model.consts.PluginConfig
+import io.github.vihanmy.pgyappupload.model.network.ResultCheckBean
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.attribute.BasicFileAttributes
 import java.time.Instant
@@ -21,6 +24,20 @@ object Tool {
             args.add(tokenizer.nextToken())
         }
         return args
+    }
+
+    fun parseEvn(evenSStr: String): Map<String, String> {
+        val result = mutableMapOf<String, String>()
+        val list = evenSStr.split("\n")
+        list.forEachIndexed { index, key ->
+            if ((index % 2) == 0) {
+                val value = list.getOrNull(index + 1)
+                if (value != null) {
+                    result[key] = value
+                }
+            }
+        }
+        return result
     }
 
     fun chooseFileAndUpload(project: Project): VirtualFile? {
@@ -49,5 +66,56 @@ object Tool {
             e.printStackTrace()
             null
         }
+    }
+
+    fun getResultStr(resultCheckBean: ResultCheckBean?, isSuccess: Boolean, filePath: String): String {
+        val log = if (resultCheckBean != null) {
+
+            val gson = GsonBuilder()
+                .setPrettyPrinting()
+                .create()
+
+            "--------------------------------------------------------------------" + "\n" + gson.toJson(resultCheckBean) + "\n" + "--------------------------------------------------------------------"
+        } else {
+            ""
+        }
+
+        val successStr = """
+上传成功! ( $filePath )
+$log
+""".trimIndent()
+        return if (isSuccess) successStr else "上传失败请重试!"
+    }
+
+    fun checkOutPutFile(filePath: String, processStartTime: Long?): Pair<Boolean, String?> {
+        val file = File(filePath)
+        if (file.exists().not()) {
+            return Pair(false, "产物文件不存在")
+        }
+        if (file.isDirectory) {
+            return Pair(false, "这是一个文件夹, 不是文件")
+        }
+        if (file.extension !in PluginConfig.supportAppFileExt) {
+            return Pair(false, "不支持的文件类型")
+        }
+        val fileTime = Files.getLastModifiedTime(file.toPath())
+
+        if (processStartTime != null) {
+            val lastModifiedTime = fileTime.toMillis()
+            if (lastModifiedTime < processStartTime) {
+                return Pair(false, "文件在执行命令前就已经存在")
+            }
+        }
+
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            .withZone(ZoneId.systemDefault())
+        val modifiedTimeStr = formatter.format(fileTime.toInstant())
+
+       val info =  """
+🎉产物合法!
+产物路径:${filePath}
+更新时间:${modifiedTimeStr}
+""".trimIndent()
+        return Pair(true, info)
     }
 }

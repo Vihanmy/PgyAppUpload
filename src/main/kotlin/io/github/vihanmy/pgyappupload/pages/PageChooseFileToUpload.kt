@@ -8,7 +8,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import com.google.gson.GsonBuilder
 import io.github.vihanmy.pgyappupload.core.AppUploadTool
 import io.github.vihanmy.pgyappupload.core.AppUploadTool.Companion.CHECK_TIME_ONCE
 import io.github.vihanmy.pgyappupload.core.AppUploadTool.Companion.MAX_CHECK_TIME
@@ -48,24 +47,6 @@ fun PageChooseFileToUpload() {
         fileLastModifiedTime = getFileLastModifiedTime(targetFile) ?: ""
     }
 
-    fun getResultStr(resultCheckBean: ResultCheckBean?, isSuccess: Boolean, testTime: Int): String {
-        val log = if (resultCheckBean != null) {
-
-            val gson = GsonBuilder()
-                .setPrettyPrinting()
-                .create()
-
-            "--------------------------------------------------------------------" + "\n" + gson.toJson(resultCheckBean) + "\n" + "--------------------------------------------------------------------"
-        } else {
-            ""
-        }
-
-        val successStr = """
-上传成功! ( ${filePath} )
-$log
-""".trimIndent()
-        return if (isSuccess) successStr else "上传失败请重试!"
-    }
 
     fun startUpload() {
         progressStep.clear()
@@ -125,7 +106,7 @@ $log
                 testTime++
             }
 
-            val re = getResultStr(resultCheckBean, isSuccess, testTime)
+            val re = Tool.getResultStr(resultCheckBean, isSuccess, filePath)
             resultCheckStep.markState(isSuccess, re)
         }
 

@@ -2,22 +2,22 @@ package io.github.vihanmy.pgyappupload.pages
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.intellij.openapi.application.ApplicationManager
+import io.github.vihanmy.pgyappupload.model.PluginSettingsStateComponent
 import io.github.vihanmy.pgyappupload.model.uistate.CmdConfigUiState
 import io.github.vihanmy.pgyappupload.model.uistate.PackageProcessConfigUiState
 import io.github.vihanmy.pgyappupload.model.uistate.PluginSettingsUiState
@@ -59,7 +59,17 @@ fun PagePluginSetting(
         initialSetting.packageProcessConfigList.remove(dat)
     }
 
-    Column(Modifier.verticalScroll(rememberScrollState())) {
+    fun copyConfig(dat: PackageProcessConfigUiState) {
+        val index = initialSetting.packageProcessConfigList.indexOf(dat)
+        initialSetting.packageProcessConfigList.add(index + 1, dat.copy())
+    }
+
+    fun onCopyCmd(packageProcessConfig: PackageProcessConfigUiState, dat: CmdConfigUiState) {
+        val index = packageProcessConfig.cmdList.indexOf(dat)
+        packageProcessConfig.cmdList.add(index + 1, dat.copy())
+    }
+
+    Column(Modifier.wrapContentHeight().fillMaxWidth()) {
         Text(
             "蒲公英平台的 API KEY",
             color = MaterialTheme.colors.onSecondary
@@ -87,6 +97,12 @@ fun PagePluginSetting(
                 onRemoveConfig = {
                     removeConfig(packageProcessConfig)
                 },
+                onCopyConfig = {
+                    copyConfig(packageProcessConfig)
+                },
+                onCopyCmd = { cmd ->
+                    onCopyCmd(packageProcessConfig, cmd)
+                }
             )
         }
         Column {
@@ -99,6 +115,21 @@ fun PagePluginSetting(
                     contentDescription = "",
                 )
                 Text("添加配置")
+            }
+        }
+        Row {
+            Button({
+                PluginSettingsStateComponent.instance.loadState(initialSetting.toStateComponent())
+                ApplicationManager.getApplication().invokeAndWait {
+                    ApplicationManager.getApplication().saveSettings()
+                }
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Done,
+                    tint = Color.White,
+                    contentDescription = "",
+                )
+                Text("保存")
             }
         }
     }
