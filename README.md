@@ -15,3 +15,48 @@
 # How
 
 
+
+# Project
+
+## 开发环境
+
+1. PC
+
+   ```cpp
+   windows 11
+   ```
+
+2. IDE
+
+   ```cpp
+   IntelliJ IDEA 2025.2.4 (Ultimate Edition)
+     
+   Build #IU-252.27397.103, built on October 23, 2025
+   
+   Licensed to Doreen Clarissa
+   Subscription is active until September 7, 2026.
+   For educational use only.
+   
+   Runtime version: 21.0.8+1-b1038.73 amd64 (JCEF 122.1.9)
+   VM: OpenJDK 64-Bit Server VM by JetBrains s.r.o.
+   
+   Kotlin plugin: K1 mode
+   ```
+
+
+
+## 打包
+
+1. 命令
+
+   ```cpp
+   ./gradlew buildPlugin
+   ```
+
+2. 产物生成目录
+
+   ```cpp
+   .\PgyAppUpload\build\distributions
+   ```
+
+   
