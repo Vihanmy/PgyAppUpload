@@ -51,6 +51,16 @@ object Tool {
         return chosenFiles.getOrNull(0)
     }
 
+    fun chooseConfigFile4Import(project: Project): VirtualFile? {
+        val descriptor = FileChooserDescriptor(true, true, true, true, true, false)
+            .withTitle("选择要导入的配置文件")
+            .withShowHiddenFiles(true)
+            .withFileFilter { (it.extension == "xml") and (it.isFile) }
+        //
+        val chosenFiles = FileChooser.chooseFiles(descriptor, project, null)
+        return chosenFiles.getOrNull(0)
+    }
+
     fun getFileLastModifiedTime(vf: VirtualFile): String? {
         return try {
             val path = vf.toNioPath()
@@ -111,7 +121,7 @@ $log
             .withZone(ZoneId.systemDefault())
         val modifiedTimeStr = formatter.format(fileTime.toInstant())
 
-       val info =  """
+        val info = """
 🎉产物合法!
 产物路径:${filePath}
 更新时间:${modifiedTimeStr}

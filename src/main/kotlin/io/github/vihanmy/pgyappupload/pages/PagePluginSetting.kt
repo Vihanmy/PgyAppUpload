@@ -10,18 +10,28 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.JDOMUtil
+import com.intellij.util.xmlb.XmlSerializer
+import io.github.vihanmy.pgyappupload.core.Tool
+import io.github.vihanmy.pgyappupload.dialog.ProJectProvidableCompositionLocal
 import io.github.vihanmy.pgyappupload.model.PluginSettingsStateComponent
 import io.github.vihanmy.pgyappupload.model.uistate.CmdConfigUiState
 import io.github.vihanmy.pgyappupload.model.uistate.PackageProcessConfigUiState
 import io.github.vihanmy.pgyappupload.model.uistate.PluginSettingsUiState
+import io.github.vihanmy.pgyappupload.tool.FileTool
 import io.github.vihanmy.pgyappupload.ui.UIPackageProcessConfig
+import org.jdom.input.SAXBuilder
+import java.io.StringReader
 
 @Preview
 @Composable
@@ -41,6 +51,28 @@ fun PagePluginSettingPreView() {
 fun PagePluginSetting(
     initialSetting: PluginSettingsUiState = PluginSettingsUiState(),
 ) {
+    val project = ProJectProvidableCompositionLocal.current
+
+    fun chooseFileToImport(project: Project) {
+        try {
+            val targetFile = Tool.chooseConfigFile4Import(project) ?: return
+            val xmlText = targetFile.inputStream.bufferedReader().use { it.readText() }
+
+            val element = SAXBuilder()
+                .build(StringReader(xmlText))
+                .rootElement
+
+            val importedState = XmlSerializer.deserialize(
+                element,
+                PluginSettingsStateComponent::class.java
+            )
+            PluginSettingsStateComponent.instance.loadState(importedState)
+            initialSetting.updateFromStateComponent(PluginSettingsStateComponent.instance)
+        } catch (e: Exception) {
+
+        }
+    }
+
     fun addCmd(item: PackageProcessConfigUiState) {
         item.cmdList.add(CmdConfigUiState())
     }
@@ -117,20 +149,59 @@ fun PagePluginSetting(
                 Text("添加配置")
             }
         }
+
         Row {
-            Button({
-                PluginSettingsStateComponent.instance.loadState(initialSetting.toStateComponent())
-                ApplicationManager.getApplication().invokeAndWait {
-                    ApplicationManager.getApplication().saveSettings()
+
+            Row {
+                Button({
+                    PluginSettingsStateComponent.instance.loadState(initialSetting.toStateComponent())
+                    ApplicationManager.getApplication().invokeAndWait {
+                        ApplicationManager.getApplication().saveSettings()
+                    }
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Done,
+                        tint = Color.White,
+                        contentDescription = "",
+                    )
+                    Text("保存")
                 }
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Done,
-                    tint = Color.White,
-                    contentDescription = "",
-                )
-                Text("保存")
+            }
+
+            Row {
+                Button({ exportPluginConfig(project) }) {
+                    Icon(
+                        imageVector = Icons.Default.ThumbUp,
+                        tint = Color.White,
+                        contentDescription = "",
+                    )
+                    Text("导出配置")
+                }
+            }
+            Row {
+                Button({
+                    chooseFileToImport(project)
+                    ApplicationManager.getApplication().invokeAndWait {
+                        ApplicationManager.getApplication().saveSettings()
+                    }
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Build,
+                        tint = Color.White,
+                        contentDescription = "",
+                    )
+                    Text("导入配置")
+                }
             }
         }
     }
+
+
+}
+
+private fun exportPluginConfig(project: Project) {
+    val currentState = PluginSettingsStateComponent.instance.state
+    val element = XmlSerializer.serialize(currentState)
+    val xmlTextStr = JDOMUtil.writeElement(element)
+    FileTool.exportConfig(project, xmlTextStr)
 }
