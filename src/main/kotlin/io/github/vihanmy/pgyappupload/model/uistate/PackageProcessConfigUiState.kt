@@ -10,10 +10,14 @@ class PackageProcessConfigUiState {
     var packageOutPutPath by mutableStateOf("")
     var name by mutableStateOf("")
 
+    //
+    var isExpend by mutableStateOf(false)
+
     fun copy(): PackageProcessConfigUiState {
         return PackageProcessConfigUiState().apply {
             this.packageOutPutPath = this@PackageProcessConfigUiState.packageOutPutPath
             this.name = this@PackageProcessConfigUiState.name
+            this.isExpend = this@PackageProcessConfigUiState.isExpend
             this.cmdList.addAll(this@PackageProcessConfigUiState.cmdList.map { it.copy() })
         }
     }

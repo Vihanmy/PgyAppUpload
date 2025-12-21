@@ -10,12 +10,16 @@ class CmdConfigUiState {
     var workDir by mutableStateOf("")
     var evenStr by mutableStateOf("")
 
+    //
+    var isExpend by mutableStateOf(true)
+
     fun copy(): CmdConfigUiState {
         return CmdConfigUiState().apply {
-           this.name = this@CmdConfigUiState.name
-           this.cmd = this@CmdConfigUiState.cmd
-           this.workDir = this@CmdConfigUiState.workDir
-           this.evenStr = this@CmdConfigUiState.evenStr
+            this.name = this@CmdConfigUiState.name
+            this.cmd = this@CmdConfigUiState.cmd
+            this.workDir = this@CmdConfigUiState.workDir
+            this.evenStr = this@CmdConfigUiState.evenStr
+            this.isExpend = this@CmdConfigUiState.isExpend
         }
     }
 }

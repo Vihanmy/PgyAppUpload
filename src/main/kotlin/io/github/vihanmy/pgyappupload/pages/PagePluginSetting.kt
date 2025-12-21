@@ -1,21 +1,19 @@
 package io.github.vihanmy.pgyappupload.pages
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.intellij.openapi.application.ApplicationManager
@@ -30,6 +28,12 @@ import io.github.vihanmy.pgyappupload.model.uistate.PackageProcessConfigUiState
 import io.github.vihanmy.pgyappupload.model.uistate.PluginSettingsUiState
 import io.github.vihanmy.pgyappupload.tool.FileTool
 import io.github.vihanmy.pgyappupload.ui.UIPackageProcessConfig
+import io.github.vihanmy.pgyappupload.ui.UIPureIconButton
+import io.github.vihanmy.pgyappupload.ui.icon.AppIcons
+import io.github.vihanmy.pgyappupload.ui.icon.appicons.Add
+import io.github.vihanmy.pgyappupload.ui.icon.appicons.ExportNotes
+import io.github.vihanmy.pgyappupload.ui.icon.appicons.MoveToInbox
+import io.github.vihanmy.pgyappupload.ui.icon.appicons.Save
 import org.jdom.input.SAXBuilder
 import java.io.StringReader
 
@@ -102,56 +106,76 @@ fun PagePluginSetting(
     }
 
     Column(Modifier.wrapContentHeight().fillMaxWidth()) {
-        Text(
-            "蒲公英平台的 API KEY",
-            color = MaterialTheme.colors.onSecondary
-        )
 
-        BasicTextField(
-            value = initialSetting.pgyApiKey,
-            onValueChange = {
-                initialSetting.pgyApiKey = it
-            },
-            modifier = Modifier
-                .border(1.dp, Color.Black)
-                .padding(10.dp),
-        )
+        Column(
+            Modifier.wrapContentHeight()
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colors.background)
+                .padding(10.dp)
+        ) {
 
-        for (packageProcessConfig in initialSetting.packageProcessConfigList) {
-            UIPackageProcessConfig(
-                packageProcessConfig,
-                onAddCmd = {
-                    addCmd(packageProcessConfig)
+            Text("蒲公英平台 API KEY", style = MaterialTheme.typography.h1)
+
+            BasicTextField(
+                value = initialSetting.pgyApiKey,
+                textStyle = MaterialTheme.typography.body1,
+                onValueChange = {
+                    initialSetting.pgyApiKey = it
                 },
-                onRemoveCmd = { cmd ->
-                    removeCmd(packageProcessConfig, cmd)
-                },
-                onRemoveConfig = {
-                    removeConfig(packageProcessConfig)
-                },
-                onCopyConfig = {
-                    copyConfig(packageProcessConfig)
-                },
-                onCopyCmd = { cmd ->
-                    onCopyCmd(packageProcessConfig, cmd)
-                }
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colors.surface.copy(0.8f))
+                    .padding(10.dp),
             )
         }
-        Column {
-            Button({
-                addConfig()
-            }) {
-                Icon(
-                    imageVector = Icons.Default.AddCircle,
-                    tint = Color.White,
-                    contentDescription = "",
+
+
+        Column(
+            Modifier.wrapContentHeight()
+                .fillMaxWidth()
+                .padding(top = 10.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colors.background)
+                .padding(10.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.wrapContentHeight().fillMaxWidth()
+            ) {
+                Text("工作流配置", style = MaterialTheme.typography.h1)
+                Box(modifier = Modifier.weight(1f))
+                UIPureIconButton(AppIcons.Add) {
+                    addConfig()
+                }
+            }
+
+            for (packageProcessConfig in initialSetting.packageProcessConfigList) {
+                Box(Modifier.height(20.dp))
+                UIPackageProcessConfig(
+                    packageProcessConfig,
+                    onAddCmd = {
+                        addCmd(packageProcessConfig)
+                    },
+                    onRemoveCmd = { cmd ->
+                        removeCmd(packageProcessConfig, cmd)
+                    },
+                    onRemoveConfig = {
+                        removeConfig(packageProcessConfig)
+                    },
+                    onCopyConfig = {
+                        copyConfig(packageProcessConfig)
+                    },
+                    onCopyCmd = { cmd ->
+                        onCopyCmd(packageProcessConfig, cmd)
+                    }
                 )
-                Text("添加配置")
             }
         }
 
-        Row {
-
+        Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
             Row {
                 Button({
                     PluginSettingsStateComponent.instance.loadState(initialSetting.toStateComponent())
@@ -160,24 +184,25 @@ fun PagePluginSetting(
                     }
                 }) {
                     Icon(
-                        imageVector = Icons.Default.Done,
+                        imageVector = AppIcons.Save,
                         tint = Color.White,
                         contentDescription = "",
                     )
                     Text("保存")
                 }
             }
-
+            Box(Modifier.width(10.dp))
             Row {
                 Button({ exportPluginConfig(project) }) {
                     Icon(
-                        imageVector = Icons.Default.ThumbUp,
+                        imageVector = AppIcons.ExportNotes,
                         tint = Color.White,
                         contentDescription = "",
                     )
-                    Text("导出配置")
+                    Text("导出")
                 }
             }
+            Box(Modifier.width(10.dp))
             Row {
                 Button({
                     chooseFileToImport(project)
@@ -186,11 +211,11 @@ fun PagePluginSetting(
                     }
                 }) {
                     Icon(
-                        imageVector = Icons.Default.Build,
+                        imageVector = AppIcons.MoveToInbox,
                         tint = Color.White,
                         contentDescription = "",
                     )
-                    Text("导入配置")
+                    Text("导入")
                 }
             }
         }

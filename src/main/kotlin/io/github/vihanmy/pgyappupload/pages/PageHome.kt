@@ -1,12 +1,20 @@
 package io.github.vihanmy.pgyappupload.pages
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.onClick
 import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import io.github.vihanmy.pgyappupload.core.AppUploadTool
 import io.github.vihanmy.pgyappupload.core.AppUploadTool.Companion.CHECK_TIME_ONCE
 import io.github.vihanmy.pgyappupload.core.AppUploadTool.Companion.MAX_CHECK_TIME
@@ -15,7 +23,6 @@ import io.github.vihanmy.pgyappupload.core.Tool
 import io.github.vihanmy.pgyappupload.dialog.ProJectProvidableCompositionLocal
 import io.github.vihanmy.pgyappupload.dialog.RouterProvidableCompositionLocal
 import io.github.vihanmy.pgyappupload.model.PackageProcessConfig
-import io.github.vihanmy.pgyappupload.model.Page
 import io.github.vihanmy.pgyappupload.model.PluginSettingsStateComponent
 import io.github.vihanmy.pgyappupload.model.network.ResultCheckBean
 import io.github.vihanmy.pgyappupload.model.processstep.ProcessStep
@@ -36,6 +43,7 @@ import kotlinx.coroutines.launch
  * desc   :
  * ```
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Preview
 @Composable
 fun PageHome() {
@@ -133,27 +141,28 @@ fun PageHome() {
             val re = Tool.getResultStr(resultCheckBean, isSuccess, filePath)
             resultCheckStep.markState(isSuccess, re)
         }
-
     }
 
     //
-    Column {
-        Button({
-            router.push(Page.ChooseFile4Upload())
-        }) {
-            Text("选择已有文件上传")
-        }
-
-        setting.packageProcessConfigList.forEach { process ->
-            Button({
-                processConfig(process)
-            }) {
-                Text("\uD83C\uDFAC\uFE0F ${process.name}")
+    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+        if (setting.packageProcessConfigList.isNotEmpty()) {
+            setting.packageProcessConfigList.forEach { process ->
+                Button({ processConfig(process) }) {
+                    Text("\uD83C\uDFAC\uFE0F ${process.name}")
+                }
             }
-        }
-        
-        progressStep.forEach { step ->
-            UIProgressStep(step)
+            progressStep.forEach { step ->
+                UIProgressStep(step)
+            }
+        } else {
+            Text(
+                "暂无工作流程配置, 可前往设置进行配置⚙️",
+                modifier = Modifier.padding(10.dp)
+                    .onClick {
+
+                    },
+                style = MaterialTheme.typography.h1
+            )
         }
     }
 }

@@ -7,9 +7,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,6 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.dp
 import io.github.vihanmy.pgyappupload.model.processstep.ProcessStepState
+import io.github.vihanmy.pgyappupload.ui.icon.AppIcons
+import io.github.vihanmy.pgyappupload.ui.icon.appicons.Check
+import io.github.vihanmy.pgyappupload.ui.icon.appicons.Close
 
 @Composable
 fun ProcessStepStateIcon(
@@ -34,7 +34,7 @@ fun ProcessStepStateIcon(
 
         ProcessStepState.Success -> {
             Icon(
-                imageVector = Icons.Default.Check,
+                imageVector = AppIcons.Check,
                 tint = Color.White,
                 contentDescription = "success",
                 modifier = Modifier.size(20.dp).clip(CircleShape).background(Color(0xff52c41a))
@@ -43,7 +43,7 @@ fun ProcessStepStateIcon(
 
         ProcessStepState.Failed -> {
             Icon(
-                imageVector = Icons.Default.Close,
+                imageVector = AppIcons.Close,
                 contentDescription = "success",
                 tint = Color.White,
                 modifier = Modifier.size(20.dp).clip(CircleShape).background(Color(0xffe84335))
