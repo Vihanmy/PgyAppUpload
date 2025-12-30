@@ -64,9 +64,9 @@ fun PageHome() {
                 val invoker = CmdInvoker(cmd, consoleView, project)
                 val stepOfCmd = ProcessStep("命令行执行(${index + 1}):${cmd.name}", cmd.getDescription())
                 progressStep.add(stepOfCmd)
-                val event = invoker.run()
-                val isSuccess = event.exitCode == 0
-                stepOfCmd.markState(isSuccess, if (isSuccess) "命令执行成功" else "${event.exitCode} ${event.text}")
+                val runResult = invoker.run()
+                val isSuccess = runResult.isSuccess
+                stepOfCmd.markState(isSuccess, if (isSuccess) "命令执行成功" else runResult.exceptionOrNull().toString())
                 if (isSuccess.not()) {
                     return@launch
                 } else {

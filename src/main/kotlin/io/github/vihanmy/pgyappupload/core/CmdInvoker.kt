@@ -18,7 +18,7 @@ class CmdInvoker(
     private val project: Project,
 ) {
 
-    suspend fun run(): ProcessEvent = suspendCoroutine { continuation ->
+    suspend fun run(): Result<Unit> = suspendCoroutine { continuation ->
         val command: List<String> = Tool.parseCommandLine(cmdConfig.cmd)
         val workingDir: String = if (cmdConfig.workDir.isNullOrBlank()) project.basePath!! else cmdConfig.workDir
         val env: Map<String, String> = Tool.parseEvn(cmdConfig.evenStr)
@@ -47,12 +47,17 @@ class CmdInvoker(
             //
             processHandler.addProcessListener(object : ProcessAdapter() {
                 override fun processTerminated(event: ProcessEvent) {
-                    continuation.resume(event)
+                    if (event.exitCode == 0) {
+                        continuation.resume(Result.success(Unit))
+                    } else {
+                        continuation.resume(Result.failure(Error("Process terminated with exit code ${event.exitCode}")))
+                    }
                 }
             })
             processHandler.startNotify()
         } catch (e: Exception) {
             e.printStackTrace()
+            continuation.resume(Result.failure(e))
         }
     }
 }
