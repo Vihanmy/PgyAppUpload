@@ -47,7 +47,7 @@ object Tool {
             .withShowHiddenFiles(true)
             .withFileFilter { (it.extension in PluginConfig.supportAppFileExt) and (it.isFile) }
         //
-        val chosenFiles = FileChooser.chooseFiles(descriptor, project, null)
+        val chosenFiles = FileChooser.chooseFiles(descriptor, project, project.projectFile)
         return chosenFiles.getOrNull(0)
     }
 
