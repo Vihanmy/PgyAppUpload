@@ -1,3 +1,5 @@
+import java.awt.Desktop
+
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm") version "2.1.20"
@@ -55,5 +57,23 @@ tasks {
     }
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.jvmTarget = "21"
+    }
+}
+
+/**
+ * build plugin and show result in file browser
+ */
+tasks.register<DefaultTask>("buildPluginAndShowOutput") {
+    group = "build"
+    val outputFile = tasks.getByName("buildPlugin").outputs.files.files.firstOrNull() ?: return@register
+    dependsOn(tasks.getByName("buildPlugin"))
+    doLast {
+        if (Desktop.isDesktopSupported()) {
+            try {
+                Runtime.getRuntime().exec("explorer.exe /select,\"${outputFile.path}\"")
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }
