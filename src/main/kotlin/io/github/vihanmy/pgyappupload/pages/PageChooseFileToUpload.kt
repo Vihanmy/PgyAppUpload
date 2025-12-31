@@ -3,6 +3,8 @@ package io.github.vihanmy.pgyappupload.pages
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -113,7 +115,8 @@ fun PageChooseFileToUpload() {
     }
     //
     Column(
-        modifier = Modifier.wrapContentHeight(),
+        modifier = Modifier.wrapContentHeight()
+            .verticalScroll(rememberScrollState())
     ) {
         Button({
             chooseFileToUpload()

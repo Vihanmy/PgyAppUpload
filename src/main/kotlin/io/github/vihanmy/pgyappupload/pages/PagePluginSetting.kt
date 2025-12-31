@@ -3,8 +3,10 @@ package io.github.vihanmy.pgyappupload.pages
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -105,76 +107,80 @@ fun PagePluginSetting(
         packageProcessConfig.cmdList.add(index + 1, dat.copy())
     }
 
-    Column(Modifier.wrapContentHeight().fillMaxWidth()) {
-
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
         Column(
-            Modifier.wrapContentHeight()
+            verticalArrangement = Arrangement.Top,
+            modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colors.background)
-                .padding(10.dp)
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
         ) {
-
-            Text("蒲公英平台 API KEY", style = MaterialTheme.typography.h1)
-
-            BasicTextField(
-                value = initialSetting.pgyApiKey,
-                textStyle = MaterialTheme.typography.body1,
-                onValueChange = {
-                    initialSetting.pgyApiKey = it
-                },
-                modifier = Modifier
+            Column(
+                modifier = Modifier.wrapContentHeight()
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colors.background)
+                    .padding(10.dp)
+            ) {
+                Text("蒲公英平台 API KEY", style = MaterialTheme.typography.h1)
+                BasicTextField(
+                    value = initialSetting.pgyApiKey,
+                    textStyle = MaterialTheme.typography.body1,
+                    onValueChange = {
+                        initialSetting.pgyApiKey = it
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colors.surface.copy(0.8f))
+                        .padding(10.dp),
+                )
+            }
+            Column(
+                Modifier.wrapContentHeight()
                     .fillMaxWidth()
                     .padding(top = 10.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colors.surface.copy(0.8f))
-                    .padding(10.dp),
-            )
-        }
-
-
-        Column(
-            Modifier.wrapContentHeight()
-                .fillMaxWidth()
-                .padding(top = 10.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colors.background)
-                .padding(10.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.wrapContentHeight().fillMaxWidth()
+                    .background(MaterialTheme.colors.background)
+                    .padding(10.dp)
             ) {
-                Text("工作流配置", style = MaterialTheme.typography.h1)
-                Box(modifier = Modifier.weight(1f))
-                UIPureIconButton(AppIcons.Add) {
-                    addConfig()
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.wrapContentHeight().fillMaxWidth()
+                ) {
+                    Text("工作流配置", style = MaterialTheme.typography.h1)
+                    Box(modifier = Modifier.weight(1f))
+                    UIPureIconButton(AppIcons.Add) {
+                        addConfig()
+                    }
+                }
+
+                for (packageProcessConfig in initialSetting.packageProcessConfigList) {
+                    Box(Modifier.height(20.dp))
+                    UIPackageProcessConfig(
+                        packageProcessConfig,
+                        onAddCmd = {
+                            addCmd(packageProcessConfig)
+                        },
+                        onRemoveCmd = { cmd ->
+                            removeCmd(packageProcessConfig, cmd)
+                        },
+                        onRemoveConfig = {
+                            removeConfig(packageProcessConfig)
+                        },
+                        onCopyConfig = {
+                            copyConfig(packageProcessConfig)
+                        },
+                        onCopyCmd = { cmd ->
+                            onCopyCmd(packageProcessConfig, cmd)
+                        }
+                    )
                 }
             }
-
-            for (packageProcessConfig in initialSetting.packageProcessConfigList) {
-                Box(Modifier.height(20.dp))
-                UIPackageProcessConfig(
-                    packageProcessConfig,
-                    onAddCmd = {
-                        addCmd(packageProcessConfig)
-                    },
-                    onRemoveCmd = { cmd ->
-                        removeCmd(packageProcessConfig, cmd)
-                    },
-                    onRemoveConfig = {
-                        removeConfig(packageProcessConfig)
-                    },
-                    onCopyConfig = {
-                        copyConfig(packageProcessConfig)
-                    },
-                    onCopyCmd = { cmd ->
-                        onCopyCmd(packageProcessConfig, cmd)
-                    }
-                )
-            }
         }
-
         Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
             Row {
                 Button({
@@ -220,8 +226,6 @@ fun PagePluginSetting(
             }
         }
     }
-
-
 }
 
 private fun exportPluginConfig(project: Project) {

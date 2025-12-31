@@ -3,10 +3,11 @@ package io.github.vihanmy.pgyappupload.pages
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.onClick
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -21,7 +22,6 @@ import io.github.vihanmy.pgyappupload.core.AppUploadTool.Companion.MAX_CHECK_TIM
 import io.github.vihanmy.pgyappupload.core.CmdInvoker
 import io.github.vihanmy.pgyappupload.core.Tool
 import io.github.vihanmy.pgyappupload.dialog.ProJectProvidableCompositionLocal
-import io.github.vihanmy.pgyappupload.dialog.RouterProvidableCompositionLocal
 import io.github.vihanmy.pgyappupload.model.PackageProcessConfig
 import io.github.vihanmy.pgyappupload.model.PluginSettingsStateComponent
 import io.github.vihanmy.pgyappupload.model.network.ResultCheckBean
@@ -50,7 +50,6 @@ import kotlin.io.path.pathString
 @Preview
 @Composable
 fun PageHome() {
-    val router = RouterProvidableCompositionLocal.current
     val project = ProJectProvidableCompositionLocal.current
     val setting = PluginSettingsStateComponent.instance
     val progressStep = remember { mutableStateListOf<ProcessStep>() }
@@ -158,7 +157,10 @@ fun PageHome() {
     }
 
     //
-    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
         if (setting.packageProcessConfigList.isNotEmpty()) {
             setting.packageProcessConfigList.forEach { process ->
                 Button({ processConfig(process) }) {
