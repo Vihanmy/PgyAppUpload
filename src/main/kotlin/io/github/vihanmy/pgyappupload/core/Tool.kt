@@ -100,20 +100,20 @@ $log
     fun checkOutPutFile(filePath: String, processStartTime: Long?): Pair<Boolean, String?> {
         val file = File(filePath)
         if (file.exists().not()) {
-            return Pair(false, "产物文件不存在")
+            return Pair(false, "产物文件不存在 (${filePath})")
         }
         if (file.isDirectory) {
-            return Pair(false, "这是一个文件夹, 不是文件")
+            return Pair(false, "这是一个文件夹, 不是文件(${filePath})")
         }
         if (file.extension !in PluginConfig.supportAppFileExt) {
-            return Pair(false, "不支持的文件类型")
+            return Pair(false, "不支持的文件类型 (${filePath})")
         }
         val fileTime = Files.getLastModifiedTime(file.toPath())
 
         if (processStartTime != null) {
             val lastModifiedTime = fileTime.toMillis()
             if (lastModifiedTime < processStartTime) {
-                return Pair(false, "文件在执行命令前就已经存在")
+                return Pair(false, "文件在执行命令前就已经存在 (${filePath})")
             }
         }
 

@@ -74,7 +74,7 @@ fun UIPackageProcessConfig(
                         config.name = it
                     }
                     Box(Modifier.height(6.dp))
-                    UIInputArea("产物路径", config.packageOutPutPath) {
+                    UIInputArea("产物路径", config.packageOutPutPath, hintInner = "支持相对路径和绝对路径(以./或名称开头)") {
                         config.packageOutPutPath = it
                     }
                 }

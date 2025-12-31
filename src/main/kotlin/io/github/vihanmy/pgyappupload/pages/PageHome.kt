@@ -34,6 +34,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.nio.file.Paths
+import kotlin.io.path.pathString
+
 
 /**
  *# 主页
@@ -77,7 +80,18 @@ fun PageHome() {
             //██ 打包产物校验
             val outPutCheckProcess = ProcessStep("产物校验", "校验产物的有效性")
             progressStep.add(outPutCheckProcess)
-            val filePath = process.packageOutPutPath
+            val configPackegePath = process.packageOutPutPath
+            val path = Paths.get(configPackegePath)
+            val filePath =
+                if (path.isAbsolute) {
+                    configPackegePath
+                } else {
+                    Paths.get(project.basePath)
+                        .resolve(configPackegePath)
+                        .normalize()
+                        .pathString
+                }
+
             val checkResult = Tool.checkOutPutFile(filePath, if (process.cmdList.isEmpty()) null else processStartTime)
             val isCheckSuccess = checkResult.first
             outPutCheckProcess.markState(isCheckSuccess, checkResult.second ?: "")
